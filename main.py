@@ -1,9 +1,24 @@
-tasks = []
+import json
+
+
+def load_tasks():
+    try:
+        with open('tasks.json', 'r') as file:
+                return json.load(file)
+    except FileNotFoundError:
+        return []
+    
+tasks = load_tasks()
+
+def save_tasks():
+    with open('tasks.json', 'w') as file:
+        json.dump(tasks, file)
 
 def add_task(task):
     new_task = {'title': task,
                 'done': False}
     tasks.append(new_task)
+    save_tasks()
     print(f"Task '{new_task['title']}' added.")
 
 
@@ -25,6 +40,7 @@ def delete_task( index):
         print("Invalid task index.")
     else:
         eliminada = tasks.pop(index)
+        save_tasks()
         print(f"Task '{eliminada['title']}' deleted.")
 
 def check_task(index):
@@ -35,7 +51,11 @@ def check_task(index):
         print("Invalid task index.")
     else:
         tasks[index]['done'] = True
+        save_tasks()
         print(f"Task '{tasks[index]['title']}' marked as done.")
+
+
+
 def menu():
     while True:
         print("\nTask Manager")

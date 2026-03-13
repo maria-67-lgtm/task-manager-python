@@ -7,6 +7,9 @@ def load_tasks():
                 return json.load(file)
     except FileNotFoundError:
         return []
+    except json.JSONDecodeError:
+        print("Error loading tasks. Starting with an empty task list.")
+        return []
     
 tasks = load_tasks()
 
@@ -17,18 +20,12 @@ def save_tasks():
 def add_task(task):
     new_task = {'title': task,
                 'done': False}
-    if not new_task['title']:
+    if not new_task['title'] or new_task['title'].isspace():
         print("Task cannot be empty.")
         return
-    if new_task['title'].isspace():
-        print("Task cannot be empty.")
-        return
-    new_title = new_task['title']
-    new_title = new_title.strip().lower()
+    new_title = new_task['title'].strip().lower()
     for t in tasks:
-        title = t['title']
-        title = title.strip().lower()
-        
+        title = t['title'].strip().lower()
         if title == new_title:
             if not t['done']:
                 print("Task already exists.")
@@ -88,7 +85,24 @@ def delete_all_tasks():
         save_tasks()
         print("All tasks deleted.")
 
+def get_task_number():
+    while True:
+        index = input("Enter the task number: ")
+        if not index.isdigit():
+            print("Invalid input. Please enter a number.")
+            continue
+        return int(index)
 
+def show_summary():
+    total_tasks = len(tasks)
+    completed_tasks = 0
+    pending_tasks= 0
+    for t in tasks:
+        if t['done']:
+            completed_tasks += 1
+        else:
+            pending_tasks += 1
+    return total_tasks, completed_tasks, pending_tasks
 
 def menu():
     while True:
@@ -98,7 +112,8 @@ def menu():
         print("3. Delete Task")
         print("4. Check Task")
         print("5. Delete All Tasks")
-        print("6. Exit")
+        print("6. Show Summary")
+        print("7. Exit")
 
         choice = input("Enter your choice: ")
         if not choice.isdigit():
@@ -111,21 +126,21 @@ def menu():
         elif choice == '2':
             show_tasks()
         elif choice == '3':
-            index = (input("Enter the task number to delete: "))
-            if index < 1 or index > len(tasks) or index.isdigit() == False:
-                print("Invalid task number.")
-            else:
-                delete_task(index)
+            show_tasks()
+            index = get_task_number()
+            delete_task(index)
         elif choice == '4':
             show_tasks()
-            index = (input("Enter the task number to check: "))
-            if index < 1 or index > len(tasks) or index.isdigit() == False:
-                print("Invalid task number.")
-            else:
-                check_task(index)
+            index = get_task_number()
+            check_task(index)
         elif choice == '5':
             delete_all_tasks()
         elif choice == '6':
+            total_tasks, completed_tasks, pending_tasks = show_summary()
+            print(f"Total tasks: {total_tasks}")
+            print(f"Completed tasks: {completed_tasks}")
+            print(f"Pending tasks: {pending_tasks}")
+        elif choice == '7':
             print("Exiting Task Manager.")
             break
         else:
